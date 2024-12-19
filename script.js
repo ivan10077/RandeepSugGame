@@ -54,6 +54,49 @@ const voteOptions = getElements('.vote');
 // Scoreboard Page Elements
 const scoreboardList = getElement('.scoreboard');
 
+
+const socket = io(' https://multiplayer-game-backend-fmf6vsadt-ivans-projects-114c7eff.vercel.app'); // Replace with your backend URL when deployed
+
+// Create server
+createServerButton.addEventListener('click', () => {
+    const playerName = nameInput.value.trim();
+    if (!playerName) {
+        alert('Please enter your name.');
+        return;
+    }
+
+    serverCode = generateServerCode();
+    socket.emit('createServer', { serverCode, playerName });
+});
+
+// Join server
+joinButton.addEventListener('click', () => {
+    const playerName = nameInput.value.trim();
+    const enteredCode = getElement('.server-code').value.trim();
+    if (!playerName || !enteredCode) {
+        alert('Please enter your name and a valid server code.');
+        return;
+    }
+
+    socket.emit('joinServer', { serverCode: enteredCode, playerName });
+});
+
+// Update players
+socket.on('updatePlayers', (players) => {
+    updatePlayerList(players);
+});
+
+// Start game
+startGameButton.addEventListener('click', () => {
+    socket.emit('startGame', serverCode);
+});
+
+socket.on('gameStarted', (data) => {
+    currentQuestion = data.question;
+    questionDisplay.textContent = currentQuestion;
+    navigateToPage(pageGame);
+});
+
 // Navigation
 const navigateToPage = (page) => {
     console.log("Navigating to Page:", page.id); // Debug log
@@ -226,3 +269,4 @@ const displayScoreboard = () => {
         scoreboardList.appendChild(listItem);
     });
 };
+
